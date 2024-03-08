@@ -5,9 +5,9 @@ import seaborn as sns
 from collections import Counter
 from textblob import TextBlob
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, confusion_matrix
 
 # Load the CSV file
 df = pd.read_csv('text.csv')
@@ -63,14 +63,34 @@ tfidf_vectors = vectorizer.fit_transform(df['text'])
 # Split your data into a training set and a test set
 X_train, X_test, y_train, y_test = train_test_split(tfidf_vectors, df['sentiment_label'], test_size=0.2, random_state=42)
 
-# Initialize a Logistic Regression model
-model = LogisticRegression()
+# Define the parameter grid
+param_grid = {
+    'C': [0.1, 1, 10, 100],
+    'penalty': ['l1', 'l2'],
+    'solver': ['liblinear']
+}
 
-# Train the model on the training set
-model.fit(X_train, y_train)
+# Initialize a GridSearchCV object
+grid_search = GridSearchCV(LogisticRegression(), param_grid, cv=5)
 
-# Evaluate the model on the test set
-y_pred = model.predict(X_test)
+# Fit the GridSearchCV object to the data
+grid_search.fit(X_train, y_train)
+
+# Print the best parameters
+print(grid_search.best_params_)
+
+# Evaluate the model with the best parameters on the test set
+y_pred = grid_search.predict(X_test)
 
 # Print the classification report
 print(classification_report(y_test, y_pred))
+
+# Calculate the confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+
+# Plot the confusion matrix
+plt.figure(figsize=(10, 7))
+sns.heatmap(cm, annot=True, fmt='d')
+plt.xlabel('Predicted')
+plt.ylabel('Truth')
+plt.show()
