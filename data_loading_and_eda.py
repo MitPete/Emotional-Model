@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from collections import Counter
 from textblob import TextBlob
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 # Load the CSV file
 df = pd.read_csv('text.csv')
@@ -41,9 +42,18 @@ df['sentiment'] = df['text'].apply(lambda text: TextBlob(text).sentiment.polarit
 # Print the first few rows of the DataFrame with the sentiment scores
 print(df.head())
 
-
 # Plot the distribution of sentiment scores
 plt.figure(figsize=(10, 6))
 sns.histplot(df['sentiment'], bins=30)
 plt.title('Sentiment Polarity Distribution')
 plt.show()
+
+# Initialize a TfidfVectorizer
+vectorizer = TfidfVectorizer()
+
+# Fit the vectorizer to the cleaned text data and transform it into TF-IDF vectors
+tfidf_vectors = vectorizer.fit_transform(df['text'])
+
+# Now, tfidf_vectors is a matrix where each row corresponds to a document (a row in your DataFrame)
+# and each column corresponds to a word in your vocabulary. The value in each cell is the TF-IDF
+# weight of that word in that document.
