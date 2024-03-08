@@ -5,6 +5,9 @@ import seaborn as sns
 from collections import Counter
 from textblob import TextBlob
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report
 
 # Load the CSV file
 df = pd.read_csv('text.csv')
@@ -39,6 +42,9 @@ plt.show()
 # Calculate sentiment polarity of the cleaned text
 df['sentiment'] = df['text'].apply(lambda text: TextBlob(text).sentiment.polarity)
 
+# Create sentiment labels based on sentiment polarity
+df['sentiment_label'] = df['sentiment'].apply(lambda sentiment: 'positive' if sentiment > 0 else ('negative' if sentiment < 0 else 'neutral'))
+
 # Print the first few rows of the DataFrame with the sentiment scores
 print(df.head())
 
@@ -54,6 +60,17 @@ vectorizer = TfidfVectorizer()
 # Fit the vectorizer to the cleaned text data and transform it into TF-IDF vectors
 tfidf_vectors = vectorizer.fit_transform(df['text'])
 
-# Now, tfidf_vectors is a matrix where each row corresponds to a document (a row in your DataFrame)
-# and each column corresponds to a word in your vocabulary. The value in each cell is the TF-IDF
-# weight of that word in that document.
+# Split your data into a training set and a test set
+X_train, X_test, y_train, y_test = train_test_split(tfidf_vectors, df['sentiment_label'], test_size=0.2, random_state=42)
+
+# Initialize a Logistic Regression model
+model = LogisticRegression()
+
+# Train the model on the training set
+model.fit(X_train, y_train)
+
+# Evaluate the model on the test set
+y_pred = model.predict(X_test)
+
+# Print the classification report
+print(classification_report(y_test, y_pred))
