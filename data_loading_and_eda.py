@@ -8,6 +8,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler
 
 # Load the full CSV file
 df = pd.read_csv('text.csv')
@@ -17,6 +19,9 @@ df = df.sample(n=1000, random_state=42)  # Change n to the number of samples you
 
 # Apply the clean_text function to the 'text' column
 df['text'] = df['text'].apply(clean_text)
+
+# Add a new column 'text_length' to the DataFrame
+df['text_length'] = df['text'].apply(len)
 
 # Split the cleaned text into words
 words = df['text'].str.split()
@@ -57,14 +62,18 @@ sns.histplot(df['sentiment'], bins=30)
 plt.title('Sentiment Polarity Distribution')
 plt.show()
 
-# Initialize a TfidfVectorizer
-vectorizer = TfidfVectorizer()
+# Define the preprocessing steps
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('text', TfidfVectorizer(), 'text'),
+        ('num', StandardScaler(), ['text_length'])
+    ])
 
-# Fit the vectorizer to the cleaned text data and transform it into TF-IDF vectors
-tfidf_vectors = vectorizer.fit_transform(df['text'])
+# Apply the preprocessing steps to your data
+X = preprocessor.fit_transform(df)
 
 # Split your data into a training set and a test set
-X_train, X_test, y_train, y_test = train_test_split(tfidf_vectors, df['sentiment_label'], test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, df['sentiment_label'], test_size=0.2, random_state=42)
 
 # Define the parameter grid
 param_grid = {
