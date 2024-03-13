@@ -9,8 +9,11 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, confusion_matrix
 
-# Load the CSV file
+# Load the full CSV file
 df = pd.read_csv('text.csv')
+
+# Create a subset of the data
+df = df.sample(n=1000, random_state=42)  # Change n to the number of samples you want
 
 # Apply the clean_text function to the 'text' column
 df['text'] = df['text'].apply(clean_text)
