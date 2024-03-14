@@ -17,6 +17,11 @@ df = df.sample(n=1000, random_state=42)
 df['text'] = df['text'].apply(clean_text)
 df['text_length'] = df['text'].apply(len)
 
+def calculate_sentiment(text):
+    return TextBlob(text).sentiment.polarity
+
+df['sentiment'] = df['text'].apply(calculate_sentiment)
+
 words = df['text'].str.split()
 all_words = [word for words_list in words for word in words_list]
 word_freq = Counter(all_words)
