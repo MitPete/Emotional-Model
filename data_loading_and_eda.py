@@ -22,6 +22,15 @@ def calculate_sentiment(text):
 
 df['sentiment'] = df['text'].apply(calculate_sentiment)
 
+def plot_sentiment_distribution(df):
+    sns.histplot(df['sentiment'], kde=True)
+    plt.title('Sentiment Distribution')
+    plt.xlabel('Sentiment')
+    plt.ylabel('Frequency')
+    plt.show()
+
+plot_sentiment_distribution(df)
+
 words = df['text'].str.split()
 all_words = [word for words_list in words for word in words_list]
 word_freq = Counter(all_words)
